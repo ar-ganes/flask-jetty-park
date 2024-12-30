@@ -7,6 +7,9 @@ import os
     DEBUG = True'''
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        'postgresql://flask_db_c5i2_user:OkRsv9pUzQszU2mvqn8TllKfYVdIZzLT@dpg-ctnfjibqf0us73agck7g-a.oregon-postgres.render.com:5432/flask_db_c5i2', 'sqlite:///default.db')  # Default to SQLite for local testing
+        'DATABASE_URL',  # Use the 'DATABASE_URL' environment variable
+        'postgresql://flask_db_c5i2_user:OkRsv9pUzQszU2mvqn8TllKfYVdIZzLT@dpg-ctnfjibqf0us73agck7g-a.oregon-postgres.render.com:5432/flask_db_c5i2'  # Default to this if DATABASE_URL is not set
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
+
