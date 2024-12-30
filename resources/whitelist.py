@@ -1,7 +1,10 @@
 from flask_restful import Resource, reqparse
-from sqlalchemy import or_, and_
-from models import db, Vehicle, WhitelistEntry, Company
-from flask import request
+from models import db, WhitelistEntry
+from flask import request, jsonify
+from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.ERROR)
 
 class WhitelistResource(Resource):
     def get(self):
@@ -16,26 +19,28 @@ class WhitelistResource(Resource):
             # Base query
             query = WhitelistEntry.query
 
-            # Filter by company name if provided
+            # Filter by company name
             if company_name:
                 query = query.filter(WhitelistEntry.company_name.ilike(f"%{company_name}%"))
 
-            # Apply effective date range filters if provided
+            # Apply date range filters
             if effective_start_date:
+                effective_start_date = datetime.strptime(effective_start_date, '%Y-%m-%d').date()
                 query = query.filter(WhitelistEntry.effective_start_date >= effective_start_date)
             if effective_end_date:
+                effective_end_date = datetime.strptime(effective_end_date, '%Y-%m-%d').date()
                 query = query.filter(WhitelistEntry.effective_end_date <= effective_end_date)
-
-            # Apply valid date range filters if provided
             if valid_start_date:
+                valid_start_date = datetime.strptime(valid_start_date, '%Y-%m-%d').date()
                 query = query.filter(WhitelistEntry.valid_from >= valid_start_date)
             if valid_end_date:
+                valid_end_date = datetime.strptime(valid_end_date, '%Y-%m-%d').date()
                 query = query.filter(WhitelistEntry.valid_to <= valid_end_date)
 
-            # Fetch filtered entries
+            # Fetch entries
             entries = query.all()
 
-            # Format the response
+            # Format response
             response = [
                 {
                     'license_plate': entry.license_plate,
@@ -49,10 +54,10 @@ class WhitelistResource(Resource):
                 }
                 for entry in entries
             ]
+            return jsonify(response)
 
-            return response, 200
         except Exception as e:
-            print("Error:", e)
+            logging.error("Error occurred: %s", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
 
     def post(self):
@@ -68,19 +73,28 @@ class WhitelistResource(Resource):
         args = parser.parse_args()
 
         try:
-            # Debug log for arguments
-            print("Arguments received:", args)
+            # Convert date strings to datetime objects
+            valid_from = datetime.strptime(args['valid_from'], '%Y-%m-%d').date()
+            valid_to = datetime.strptime(args['valid_to'], '%Y-%m-%d').date()
+            effective_start_date = datetime.strptime(args['effective_start_date'], '%Y-%m-%d').date() if args.get('effective_start_date') else None
+            effective_end_date = datetime.strptime(args['effective_end_date'], '%Y-%m-%d').date() if args.get('effective_end_date') else None
 
-            # Create a new whitelist entry
+            # Validate date ranges
+            if valid_from > valid_to:
+                return {"error": "'valid_from' must be earlier than 'valid_to'"}, 400
+            if effective_start_date and effective_end_date and effective_start_date > effective_end_date:
+                return {"error": "'effective_start_date' must be earlier than 'effective_end_date'"}, 400
+
+            # Create whitelist entry
             entry = WhitelistEntry(
                 license_plate=args['license_plate'],
                 make_model=args['make_model'],
                 individual_name=args['individual_name'],
                 company_name=args['company_name'],
-                valid_from=args['valid_from'],
-                valid_to=args['valid_to'],
-                effective_start_date=args.get('effective_start_date'),  # Ensure these values are passed
-                effective_end_date=args.get('effective_end_date')
+                valid_from=valid_from,
+                valid_to=valid_to,
+                effective_start_date=effective_start_date,
+                effective_end_date=effective_end_date
             )
             db.session.add(entry)
             db.session.commit()
@@ -89,6 +103,5 @@ class WhitelistResource(Resource):
 
         except Exception as e:
             db.session.rollback()
-            print("Error:", e)
+            logging.error("Error occurred: %s", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
-
