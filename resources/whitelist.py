@@ -1,8 +1,9 @@
 from flask_restful import Resource, reqparse
 from sqlalchemy import or_, and_
-from models import db, Vehicle, WhitelistEntry, Company
+from models import db, WhitelistEntry
 from flask import request
 from datetime import datetime
+
 
 class WhitelistResource(Resource):
     def get(self):
@@ -56,47 +57,45 @@ class WhitelistResource(Resource):
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
 
-    class WhitelistResource(Resource):
-        def post(self):
-            parser = reqparse.RequestParser()
-            parser.add_argument('license_plate', type=str, required=True, help="License plate is required")
-            parser.add_argument('make_model', type=str, required=True, help="Make and model are required")
-            parser.add_argument('individual_name', type=str, required=True, help="Individual name is required")
-            parser.add_argument('company_name', type=str, required=True, help="Company name is required")
-            parser.add_argument('valid_from', type=str, required=True, help="Valid from date is required")
-            parser.add_argument('valid_to', type=str, required=True, help="Valid to date is required")
-            parser.add_argument('effective_start_date', type=str, required=False, help="Effective start date is optional")
-            parser.add_argument('effective_end_date', type=str, required=False, help="Effective end date is optional")
-            args = parser.parse_args()
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('license_plate', type=str, required=True, help="License plate is required")
+        parser.add_argument('make_model', type=str, required=True, help="Make and model are required")
+        parser.add_argument('individual_name', type=str, required=True, help="Individual name is required")
+        parser.add_argument('company_name', type=str, required=True, help="Company name is required")
+        parser.add_argument('valid_from', type=str, required=True, help="Valid from date is required")
+        parser.add_argument('valid_to', type=str, required=True, help="Valid to date is required")
+        parser.add_argument('effective_start_date', type=str, required=False, help="Effective start date is optional")
+        parser.add_argument('effective_end_date', type=str, required=False, help="Effective end date is optional")
+        args = parser.parse_args()
 
-            try:
-                # Debug log for arguments
-                print("Arguments received:", args)
+        try:
+            # Debug log for arguments
+            print("Arguments received:", args)
 
-                # Convert string dates to Python date objects
-                valid_from = datetime.strptime(args['valid_from'], '%Y-%m-%d').date()
-                valid_to = datetime.strptime(args['valid_to'], '%Y-%m-%d').date()
-                effective_start_date = datetime.strptime(args['effective_start_date'], '%Y-%m-%d').date() if args.get('effective_start_date') else None
-                effective_end_date = datetime.strptime(args['effective_end_date'], '%Y-%m-%d').date() if args.get('effective_end_date') else None
+            # Convert string dates to Python date objects
+            valid_from = datetime.strptime(args['valid_from'], '%Y-%m-%d').date()
+            valid_to = datetime.strptime(args['valid_to'], '%Y-%m-%d').date()
+            effective_start_date = datetime.strptime(args['effective_start_date'], '%Y-%m-%d').date() if args.get('effective_start_date') else None
+            effective_end_date = datetime.strptime(args['effective_end_date'], '%Y-%m-%d').date() if args.get('effective_end_date') else None
 
-                # Create a new whitelist entry
-                entry = WhitelistEntry(
-                    license_plate=args['license_plate'],
-                    make_model=args['make_model'],
-                    individual_name=args['individual_name'],
-                    company_name=args['company_name'],
-                    valid_from=valid_from,
-                    valid_to=valid_to,
-                    effective_start_date=effective_start_date,
-                    effective_end_date=effective_end_date
-                )
-                db.session.add(entry)
-                db.session.commit()
+            # Create a new whitelist entry
+            entry = WhitelistEntry(
+                license_plate=args['license_plate'],
+                make_model=args['make_model'],
+                individual_name=args['individual_name'],
+                company_name=args['company_name'],
+                valid_from=valid_from,
+                valid_to=valid_to,
+                effective_start_date=effective_start_date,
+                effective_end_date=effective_end_date
+            )
+            db.session.add(entry)
+            db.session.commit()
 
-                return {"message": "Vehicle whitelisted successfully"}, 201
+            return {"message": "Vehicle whitelisted successfully"}, 201
 
-            except Exception as e:
-                db.session.rollback()
-                print("Error:", e)
-                return {"message": "Internal Server Error", "error": str(e)}, 500
-
+        except Exception as e:
+            db.session.rollback()
+            print("Error:", e)
+            return {"message": "Internal Server Error", "error": str(e)}, 500
