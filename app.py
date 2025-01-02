@@ -47,4 +47,4 @@ api.add_resource(UsageReportResource, '/usage_report')
 api.add_resource(FilteredWhitelistResource, '/filtered_whitelist') 
 
 if __name__ == '__main__':
-    app.run()''''''
+    app.run()'''
