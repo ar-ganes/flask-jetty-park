@@ -24,6 +24,8 @@ class WhitelistEntry(db.Model):
     company_name = db.Column(db.String(100), nullable=False)
     valid_from = db.Column(db.Date, nullable=False)
     valid_to = db.Column(db.Date, nullable=False)
+    email = db.Column(db.String(100), nullable=True)  # New field
+    phone_number = db.Column(db.String(15), nullable=True)
     effective_start_date = db.Column(db.Date, nullable=True)  # Ensure this is defined
     effective_end_date = db.Column(db.Date, nullable=True)    # Ensure this is defined
 

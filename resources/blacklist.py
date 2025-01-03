@@ -89,3 +89,51 @@ class BlacklistResource(Resource):
             db.session.rollback()
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('license_plate', type=str, required=True, help="License plate is required to identify the entry")
+        parser.add_argument('make_model', type=str, required=False, help="Vehicle make and model is optional")
+        parser.add_argument('individual_name', type=str, required=False, help="Individual name is optional")
+        parser.add_argument('blacklisted_date', type=str, required=False, help="Blacklisted date is optional")
+        parser.add_argument('reason', type=str, required=False, help="Reason for blacklisting is optional")
+        args = parser.parse_args()
+
+        try:
+            # Fetch the existing entry by license_plate
+            entry = BlacklistEntry.query.filter_by(license_plate=args['license_plate']).first()
+            if not entry:
+                return {"message": "Entry not found for the given license plate"}, 404
+
+            # Update the fields if provided
+            for field, value in args.items():
+                if value is not None:  # Only update non-None values
+                    setattr(entry, field, value)
+
+            db.session.commit()
+            return {"message": "Blacklist entry updated successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            print("Error:", e)
+            return {"message": "Internal Server Error", "error": str(e)}, 500
+        
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('license_plate', type=str, required=True, help="License plate is required to identify the entry")
+        args = parser.parse_args()
+
+        try:
+            # Fetch the entry to delete
+            entry = BlacklistEntry.query.filter_by(license_plate=args['license_plate']).first()
+            if not entry:
+                return {"message": "Entry not found for the given license plate"}, 404
+
+            # Delete the entry
+            db.session.delete(entry)
+            db.session.commit()
+            return {"message": "Blacklist entry deleted successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            print("Error:", e)
+            return {"message": "Internal Server Error", "error": str(e)}, 500
