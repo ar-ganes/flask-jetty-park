@@ -4,8 +4,11 @@ from models import db, WhitelistEntry
 from flask import request
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import jwt_required
+
 
 class WhitelistResource(Resource):
+    @jwt_required()
     def get(self):
         try:
             # Extract query parameters
