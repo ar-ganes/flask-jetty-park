@@ -5,7 +5,7 @@ from config import Config
 from flask_cors import CORS
 from resources.whitelist import WhitelistResource
 from resources.blacklist import BlacklistResource
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+#from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 import requests
 import os
 # Initialize JWTManager
@@ -15,9 +15,9 @@ app = Flask(__name__)
 CORS(app) 
 app.config.from_object(Config)
 
-jwt = JWTManager(app)
+#jwt = JWTManager(app)
 
-# Hardcoded credentials (for simplicity)
+'''# Hardcoded credentials (for simplicity)
 USERNAME = "zigjettypark@zed.digital"
 PASSWORD = "zigjettypark@1234"
 
@@ -34,7 +34,7 @@ def login():
         access_token = create_access_token(identity=data["username"])
         return jsonify({"access_token": access_token}), 200
     else:
-        return jsonify({"message": "Invalid username or password"}), 401
+        return jsonify({"message": "Invalid username or password"}), 401'''
 
 
 CARDKNOX_BASE_URL = "https://x1.cardknox.com"
