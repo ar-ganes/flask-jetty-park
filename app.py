@@ -17,7 +17,7 @@ app.config.from_object(Config)
 
 #jwt = JWTManager(app)
 
-'''# Hardcoded credentials (for simplicity)
+'''Hardcoded credentials (for simplicity)
 USERNAME = "zigjettypark@zed.digital"
 PASSWORD = "zigjettypark@1234"
 
