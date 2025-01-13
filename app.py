@@ -5,6 +5,7 @@ from config import Config
 from flask_cors import CORS
 from resources.whitelist import WhitelistResource
 from resources.blacklist import BlacklistResource
+from resources.jettypark import FareResource
 #from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 import requests
 import os
@@ -66,6 +67,7 @@ db.init_app(app)
 api = Api(app)
 api.add_resource(WhitelistResource, '/whitelist')
 api.add_resource(BlacklistResource, '/blacklist')
+api.add_resource(FareResource, '/api/getFarebyAgency')
 
 if __name__ == '__main__':
     app.run(debug=True)
