@@ -128,6 +128,8 @@ class FareResource(Resource):
         parser.add_argument('productcost', type=float, required=False)
         parser.add_argument('createdby', type=str, required=False)
         parser.add_argument('lastupdatedby', type=str, required=False)
+        parser.add_argument('productname', type=str, required=False)
+        parser.add_argument('productimageurl', type=str, required=False)
         args = parser.parse_args()
 
         try:
