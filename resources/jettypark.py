@@ -110,5 +110,59 @@ class FareResource(Resource):
             db.session.rollback()
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
+    
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('fareid', type=int, required=True, help="fareid is required")
+        parser.add_argument('fareamount', type=float, required=False)
+        parser.add_argument('farename', type=str, required=False)
+        parser.add_argument('validtill', type=str, required=False)
+        parser.add_argument('ski', type=str, required=False)
+        args = parser.parse_args()
+
+        try:
+            # Fetch the Fare entry to update
+            fare = Fares.query.get(args['fareid'])
+            if not fare:
+                return {"message": "Fare not found"}, 404
+
+            # Update fields
+            if args['fareamount'] is not None:
+                fare.fareamount = args['fareamount']
+            if args['farename'] is not None:
+                fare.farename = args['farename']
+            if args['validtill'] is not None:
+                fare.validtill = datetime.fromisoformat(args['validtill'])
+            if args['ski'] is not None:
+                fare.ski = args['ski']
+
+            db.session.commit()
+            return {"message": "Fare updated successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            print("Error:", e)
+            return {"message": "Internal Server Error", "error": str(e)}, 500
+
+    def delete(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('fareid', type=int, required=True, help="fareid is required")
+        args = parser.parse_args()
+
+        try:
+            # Fetch the Fare entry to delete
+            fare = Fares.query.get(args['fareid'])
+            if not fare:
+                return {"message": "Fare not found"}, 404
+
+            # Delete the entry
+            db.session.delete(fare)
+            db.session.commit()
+            return {"message": "Fare deleted successfully"}, 200
+
+        except Exception as e:
+            db.session.rollback()
+            print("Error:", e)
+            return {"message": "Internal Server Error", "error": str(e)}, 500
 
         
