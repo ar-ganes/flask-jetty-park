@@ -113,11 +113,21 @@ class FareResource(Resource):
     
     def put(self):
         parser = reqparse.RequestParser()
+        # Add all fields to the parser
         parser.add_argument('fareid', type=int, required=True, help="fareid is required")
         parser.add_argument('fareamount', type=float, required=False)
         parser.add_argument('farename', type=str, required=False)
         parser.add_argument('validtill', type=str, required=False)
         parser.add_argument('ski', type=str, required=False)
+        parser.add_argument('categoryid', type=int, required=False)
+        parser.add_argument('routename', type=str, required=False)
+        parser.add_argument('isactive', type=bool, required=False)
+        parser.add_argument('expirytime', type=str, required=False)
+        parser.add_argument('maxcount', type=int, required=False)
+        parser.add_argument('productdescription', type=str, required=False)
+        parser.add_argument('productcost', type=float, required=False)
+        parser.add_argument('createdby', type=str, required=False)
+        parser.add_argument('lastupdatedby', type=str, required=False)
         args = parser.parse_args()
 
         try:
@@ -126,16 +136,15 @@ class FareResource(Resource):
             if not fare:
                 return {"message": "Fare not found"}, 404
 
-            # Update fields
-            if args['fareamount'] is not None:
-                fare.fareamount = args['fareamount']
-            if args['farename'] is not None:
-                fare.farename = args['farename']
-            if args['validtill'] is not None:
-                fare.validtill = datetime.fromisoformat(args['validtill'])
-            if args['ski'] is not None:
-                fare.ski = args['ski']
+            # Dynamically update all fields present in args
+            for field, value in args.items():
+                if field != 'fareid' and value is not None:  # Skip fareid and None values
+                    if field == 'validtill' or field == 'expirytime':  # Handle date fields
+                        setattr(fare, field, datetime.fromisoformat(value))
+                    else:
+                        setattr(fare, field, value)
 
+            # Commit changes to the database
             db.session.commit()
             return {"message": "Fare updated successfully"}, 200
 
@@ -143,6 +152,7 @@ class FareResource(Resource):
             db.session.rollback()
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
+
 
     def delete(self):
         parser = reqparse.RequestParser()
