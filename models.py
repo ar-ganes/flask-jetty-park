@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy import Boolean
 
 
 db = SQLAlchemy()
@@ -86,4 +87,6 @@ class Fares(db.Model):
     v_months = db.Column(db.Integer, nullable=True)
     devicecode = db.Column(db.Integer, nullable=True)
     ski = db.Column(db.String, nullable=True)
+    isfavourite = db.Column(Boolean, nullable=False, default=False)
+    
 

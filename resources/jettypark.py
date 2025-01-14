@@ -63,6 +63,7 @@ class FareResource(Resource):
                     "validtill": fare.validtill.isoformat() if fare.validtill else None,
                     "verificationstatus": fare.verificationstatus or 0,
                     "zoneid": fare.zoneid or 0,
+                    "isFavourite": fare.isfavourite,
                 }
                 for fare in fares
             ]
@@ -85,6 +86,7 @@ class FareResource(Resource):
         parser.add_argument('createdby', type=str, required=False, help="Optional field for createdby")
         parser.add_argument('productdescription', type=str, required=False, help="Optional field for productdescription")
         parser.add_argument('productcost', type=float, required=False, help="Optional field for productcost")
+        parser.add_argument('isFavourite', type=bool, required=False, help="Optional field for isFavourite (True/False)")
         args = parser.parse_args()
 
         try:
@@ -99,7 +101,8 @@ class FareResource(Resource):
                 routename=args.get('routename'),
                 createdby=args.get('createdby'),
                 productdescription=args.get('productdescription'),
-                productcost=args.get('productcost')
+                productcost=args.get('productcost'),
+                isfavourite=args.get('isfavourite', False)
             )
             db.session.add(fare)
             db.session.commit()
@@ -130,6 +133,7 @@ class FareResource(Resource):
         parser.add_argument('lastupdatedby', type=str, required=False)
         parser.add_argument('productname', type=str, required=False)
         parser.add_argument('productimageurl', type=str, required=False)
+        parser.add_argument('isfavourite', type=bool, required= False)
         args = parser.parse_args()
 
         try:
