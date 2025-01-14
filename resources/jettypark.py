@@ -169,6 +169,7 @@ class FareResource(Resource):
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
 
+
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument('fareid', type=int, required=True, help="fareid is required")
