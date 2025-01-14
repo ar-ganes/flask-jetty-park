@@ -86,10 +86,16 @@ class FareResource(Resource):
         parser.add_argument('createdby', type=str, required=False, help="Optional field for createdby")
         parser.add_argument('productdescription', type=str, required=False, help="Optional field for productdescription")
         parser.add_argument('productcost', type=float, required=False, help="Optional field for productcost")
-        parser.add_argument('isFavourite', type=bool, required=False, help="Optional field for isFavourite (True/False)")
+        parser.add_argument('isfavourite', type=bool, required=False, help="Optional field for isfavourite (True/False)")
         args = parser.parse_args()
 
         try:
+            # Debug log to check parsed arguments
+            print("Parsed Arguments:", args)
+
+            # Handle `isfavourite` explicitly
+            isfavourite_value = args.get('isfavourite', False)
+
             # Create a new Fare entry
             fare = Fares(
                 agencyid=args['agencyid'],
@@ -102,7 +108,7 @@ class FareResource(Resource):
                 createdby=args.get('createdby'),
                 productdescription=args.get('productdescription'),
                 productcost=args.get('productcost'),
-                isfavourite=args.get('isfavourite', False)
+                isfavourite=isfavourite_value
             )
             db.session.add(fare)
             db.session.commit()
@@ -113,10 +119,10 @@ class FareResource(Resource):
             db.session.rollback()
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
+
     
     def put(self):
         parser = reqparse.RequestParser()
-        # Add all fields to the parser
         parser.add_argument('fareid', type=int, required=True, help="fareid is required")
         parser.add_argument('fareamount', type=float, required=False)
         parser.add_argument('farename', type=str, required=False)
@@ -133,7 +139,7 @@ class FareResource(Resource):
         parser.add_argument('lastupdatedby', type=str, required=False)
         parser.add_argument('productname', type=str, required=False)
         parser.add_argument('productimageurl', type=str, required=False)
-        parser.add_argument('isfavourite', type=bool, required= False)
+        parser.add_argument('isfavourite', type=bool, required=False)
         args = parser.parse_args()
 
         try:
@@ -142,12 +148,16 @@ class FareResource(Resource):
             if not fare:
                 return {"message": "Fare not found"}, 404
 
+            # Log parsed arguments for debugging
+            print("Parsed Arguments:", args)
+
             # Dynamically update all fields present in args
             for field, value in args.items():
                 if field != 'fareid' and value is not None:  # Skip fareid and None values
                     if field == 'validtill' or field == 'expirytime':  # Handle date fields
                         setattr(fare, field, datetime.fromisoformat(value))
                     else:
+                        print(f"Updating field: {field}, Value: {value}")  # Debug log
                         setattr(fare, field, value)
 
             # Commit changes to the database
@@ -158,7 +168,6 @@ class FareResource(Resource):
             db.session.rollback()
             print("Error:", e)
             return {"message": "Internal Server Error", "error": str(e)}, 500
-
 
     def delete(self):
         parser = reqparse.RequestParser()
