@@ -63,7 +63,7 @@ class FareResource(Resource):
                     "validtill": fare.validtill.isoformat() if fare.validtill else None,
                     "verificationstatus": fare.verificationstatus or 0,
                     "zoneid": fare.zoneid or 0,
-                    "isFavourite": fare.isfavourite,
+                    "isfavourite": fare.isfavourite,
                 }
                 for fare in fares
             ]
@@ -141,6 +141,8 @@ class FareResource(Resource):
         parser.add_argument('productimageurl', type=str, required=False)
         parser.add_argument('isfavourite', type=bool, required=False)
         args = parser.parse_args()
+
+        args = {key.lower(): value for key, value in args.items()}
 
         try:
             # Fetch the Fare entry to update
